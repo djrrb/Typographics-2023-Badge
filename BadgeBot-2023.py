@@ -105,12 +105,13 @@ def strokeHex(myHexValue):
 
 colorPalettes = {
    'cinammon': {
-        'background': hex2rgb('#e8cde9'),
+        'background': hex2rgb('#EDCCEB'),
         'text': hex2rgb('#a62116'),
-        'pattern': hex2rgb('#a62116'),
-        'name': hex2rgb('#ea3323'),
+        #'pattern': hex2rgb('#a62116'),
+        'pattern': hex2rgb('#ffffff'),
+        'name': hex2rgb('#ff0000'),
         'shine': hex2rgb('#FFFFFF'),
-        'shade': hex2rgb('#7d1d17'),
+        'shade': hex2rgb('#890E0E'),
     },
     
    'watermelon': {
@@ -198,6 +199,8 @@ nameFont = '../Typographics fonts 2023-06-05/Mayonnaise v6/Mayonnaise-V6-NS-desk
 nameFontShade = '../Typographics fonts 2023-06-05/Mayonnaise v6/Mayonnaise-V6-NS-desk/Mayonnaise-Volume-Shadow-desktop.otf'
 nameFontShine = '../Typographics fonts 2023-06-05/Mayonnaise v6/Mayonnaise-Shine-Variable/Mayonnaise-variable-shine.ttf'
 patternFont = '../Typographics fonts 2023-06-05/Crackly/CracklyLines20.otf'
+companyFont = '../Typographics fonts 2023-06-05/Cupidus/Cupidus-Text.ttf'
+
 
 nameFonts = {
     'shade': nameFontShade,
@@ -205,35 +208,6 @@ nameFonts = {
     'shine': nameFontShine
     }
 
-companyFont = '../Typographics fonts 2023-06-05/Cupidus/Cupidus-Text.ttf'
-
-
-
-
-# Released by DJR under the BSD license 
-def norm(value, start, stop):
-	"""
-	Return the interpolation factor (between 0 and 1) of a VALUE between START and STOP.
-	See also: https://processing.org/reference/norm_.html
-	"""
-	return float(value-start) / float(stop-start)
-	
-def lerp(start, stop, amt):
-	"""
-	Interpolate using a value between 0 and 1
-	https://processing.org/reference/lerp_.html
-	"""
-	return start + (stop-start) * amt
-
-def remap(value, start1, stop1, start2, stop2, clamp=False):
-    """
-    Re-maps a number from one range to another.
-    """
-    factor = norm(value, start1, stop1)
-    if clamp:
-        if factor < 0: factor = 0
-        if factor > 1: factor = 1
-    return lerp(start2, stop2, factor)
 
 
 def parseRowData(rowData, colHeaders):
@@ -320,19 +294,19 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
         doLine1Split = True
         doLine2Split = True
         for word in line1words:
-            if len(word) < 4:
+            if len(word) < 2:
                 doLine1Split = False
         for word in line2words:
-            if len(word) < 4:
+            if len(word) < 2:
                 doLine2Split = False
-                                
+    
         # if the total name plus space is less than 6 chars, draw it on one line
         if len(oneLine) < 6 or not line1 or not line2:
             theName = oneLine
             if theName not in linebreakExceptions: linebreakExceptions.append(theName)
         # if the two-line setting is particularly balanced, always draw it on two lines
-        elif abs(len(line1) - len(line2)) < 3:
-            theName = twoLines
+        #elif abs(len(line1) - len(line2)) < 3:
+        #    theName = twoLines
         # if the first name has multiple words and should break
         elif len(line1words) > 1 and doLine1Split:
             # in a few situations, both names have multiple words and we will break to four lines
@@ -349,7 +323,9 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
             if theName not in linebreakExceptions: linebreakExceptions.append(theName)
         # in all other cases, just use two lines
         else:
-            theName = line1 + '\n' + line2 
+            theName = line1 + '\n' + line2
+            
+        theName = theName.replace('-', '-\n')
         
         # how many lines did we end up with?
         lineCount = theName.count('\n')+1
@@ -386,37 +362,61 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
         theLineHeight = theFontSize*.5 + lineGap
 
 
-        print(theName)
-        xoffset = None
-        yoffset = None
-        for hit, layer in enumerate(['shade', 'shade', 'name', 'shine']):
-            fs = FormattedString(fill=colorPalette[layer], font=nameFonts[layer], fontSize=theFontSize, lineHeight=theLineHeight)
-            if hit == 0:
-                #strokeWidth(10)
-                fs.append('',fill=colorPalette['background'])
-                #stroke(*colorPalette['background'])
-            elif hit == 3:
-                fontVariations(nwx0=500)
-                fs.append('', fontVariations={'nwx0':500})
-            fs.append(theName)
-            tw, th = textSize(fs)
-            cap = fs.fontCapHeight()
-            #thAdjust = th + (cap-theLineHeight )
-            
-            thAdjust = cap*lineCount + lineGap*(lineCount-1)
-            lineOffset = cap*(lineCount-1)+lineGap*(lineCount-1)
-            if xoffset is None:
-                xoffset = (boxWidth - tw)/2 + 2
-            if yoffset is None:
-                yoffset = (boxHeight - thAdjust)/2
-    
+        print(theName, theFontSize)
 
-            #with savedState():
-            #    fill(1,1,1,.5)
-            #    rect(xoffset, yoffset, tw, thAdjust)
-            
-            text(fs, (xoffset, yoffset+lineOffset))
-            stroke(None)
+        
+        fs = FormattedString(theName, fill=1, font=nameFonts['name'], fontSize=theFontSize, lineHeight=theLineHeight, fallbackFont=nameFonts['name'])
+
+        tw, th = textSize(fs)
+        cap = fs.fontCapHeight()
+        #thAdjust = th + (cap-theLineHeight )
+        
+        thAdjust = cap*lineCount + lineGap*(lineCount-1)
+        #lineOffset = cap*(lineCount-1)+lineGap*(lineCount-1)
+        xoffset = (boxWidth - tw)/2 + 2
+        yoffset = (boxHeight - thAdjust)/2
+
+        lines = theName.split('\n')
+
+
+        translate(xoffset, yoffset)
+        for hit, layer in enumerate(['shade', 'shade', 'name', 'shine']):
+            with savedState():
+                translate(0, cap*(lineCount-1)+lineGap*(lineCount-1))
+                for lineNumber, line in enumerate(lines):
+                   #fill(0)
+                   #oval(-10, -10, 20, 20)
+                   fs = FormattedString(fill=colorPalette[layer], font=nameFonts[layer], fontSize=theFontSize, lineHeight=theLineHeight, fallbackFont=nameFonts['name'])
+                   if hit == 0:
+                        #strokeWidth(10)
+                        fs.append('',fill=colorPalette['background'])
+                        #stroke(*colorPalette['background'])
+                   elif hit == 3:
+                        fontVariations(nwx0=500)
+                        fs.append('', fontVariations={'nwx0':500})
+                   fs.append(line)
+                   #with savedState():
+                   #     fill(1,1,1,.5)
+                   #     rect(0, 0, tw, cap)
+                   with savedState():
+                       if textSize(fs)[0] < w/2.5 and theFontSize < 55:
+                           if lineNumber != 0:
+                               translate(0, -cap/2)
+                           scale(1.5)
+                           extraSpaceBelow = True
+                       else:
+                           extraSpaceBelow = False
+                   
+                       nudge = 0
+                       if fs[0] == 'J':
+                           nudge = -.05*theFontSize
+                       elif fs[0] == 'T':
+                           nudge = -.025*theFontSize
+                       text(fs, (nudge, 0))
+                       stroke(None)
+                   translate(0, -cap-lineGap)
+                   if extraSpaceBelow:
+                       translate(0, -lineGap)
                 
     
 def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False, phase=0, bleedLeft=0, bleedRight=0, bgIndex=None, colorPalette=None):
@@ -625,6 +625,9 @@ if __name__ == "__main__":
 
     csvPath = os.path.join(basePath, '../partial/Typographics_Conference_2023_Attendee_Summary_Report_CSV_7366991467_20230605_1401.csv')
 
+    #csvPath = os.path.join(basePath, '../partial/attendees.csv')
+
+
     colHeaders, data = readDataFromCSV(csvPath)
     
     #data = data[24:25]
@@ -664,6 +667,8 @@ if __name__ == "__main__":
         for i, rowData in enumerate(data[:]):
 
             firstName, lastName, company = parseRowData(rowData, colHeaders)
+            if 'Livestream' in rowData[8]:
+                continue
 
             colorPalette = colorPalettes[choice(list(colorPalettes.keys()))]
 
