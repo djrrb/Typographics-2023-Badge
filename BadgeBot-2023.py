@@ -17,6 +17,16 @@ import csv
 from easing_functions import *
 
 
+def round_to_multiple(number, multiple, direction='up'):
+    if direction == 'nearest':
+        return multiple * round(number / multiple)
+    elif direction == 'up':
+        return multiple * ceil(number / multiple)
+    elif direction == 'down':
+        return multiple * floor(number / multiple)
+    else:
+        return multiple * round(number / multiple)
+
 def hex2rgb(myHexString):
     # this is a function that converts a hex string ‘#FF0000’ to a list of RGB values
     # remove any pound sign that precedes the string so we are just looking at the
@@ -195,7 +205,7 @@ nameFonts = {
     'shine': nameFontShine
     }
 
-companyFont = '../Typographics fonts 2023-06-05/Cupidus/Cupidus-Regular.ttf'
+companyFont = '../Typographics fonts 2023-06-05/Cupidus/Cupidus-Text.ttf'
 
 
 
@@ -241,13 +251,13 @@ ascenders = [u'Ñ', u'Á', u'À', u'Ú', u'Ó', u'É', u'é']
 
 
 
-def drawCompany(company, companySize, companyWidth, companyHeight, textColor, bottomMargin=0, bleedLeft=0, bleedRight=0):
+def drawCompany(company, companySize, companyWidth, companyHeight, textColor, bottomMargin=0, bleedLeft=0, bleedRight=0, patternFontSize=None):
     
     trackValue = 0.15
     wordSpaceTracking = .75
     
 
-    companyFs = FormattedString('', font=companyFont, fontSize=companySize, fill=colorPalette['text'], lineHeight=companySize, fontVariations={'wdth': 93}, tracking=trackValue)
+    companyFs = FormattedString('', font=companyFont, fontSize=companySize, fill=colorPalette['text'], lineHeight=companySize, fontVariations={'wdth': 93}, tracking=trackValue, align="center")
     for companyChar in company:
         if companyChar == ' ':
             companyFs.append(companyChar, tracking=wordSpaceTracking)
@@ -256,20 +266,27 @@ def drawCompany(company, companySize, companyWidth, companyHeight, textColor, bo
             companyFs.append(companyChar)
     
     cw, ch = textSize(companyFs, width=companyWidth)
-    if cw > companyWidth-50:
-        companyFs = FormattedString(company, font=companyFont, fontSize=companySize, fill=colorPalette['text'], lineHeight=companySize, fontVariations={'wdth': 80})
 
-        
-    fill(*colorPalette['background'])
-    rect(0, 0, width()+bleedLeft+bleedRight, companyHeight)
-    with savedState():
-        stroke(*colorPalette['pattern'])
-        strokeWidth(0.8)
-        line((0, companyHeight), (width(), companyHeight))
+    translate(w/2, 0)
     
+    cwm = cw+30
+    cwmu = round_to_multiple(cwm, patternFontSize)
+    cwmu = min(w+1, cwmu)
+    
+    
+    fill(*colorPalette['background'])
+    stroke(*colorPalette['pattern'])
+    strokeWidth(0.7)
+    rect(-cwmu/2, -10, cwmu, companyHeight+10)
+    #with savedState():
+    #    stroke(*colorPalette['pattern'])
+    #    strokeWidth(0.8)
+    #    line((0, companyHeight), (width(), companyHeight))
+    
+    diff = (companyHeight-ch)/2
         
     fill(*colorPalette['text'])
-    text(companyFs, (w/2, bottomMargin), align="center")
+    textBox(companyFs, (-cwmu/2, -diff, cwmu, companyHeight), align="center")
 
 def capitalize(theText):
     # convert text to uppercase, and deal with McNames => McNAMES
@@ -339,10 +356,11 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
         
         # set font size tolerances
         # need room at the top and bottom for the repeating slices
-        maxFontSize = 84
+        maxFontSize = 95
         threeLineMaxSize = 70
         oneLineMaxSize = 160
         manyLineMaxFontSize = 50
+        theName = theName.strip()
         
         # set the font
         font(nameFont)
@@ -367,32 +385,37 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
         lineGap = theFontSize*.06
         theLineHeight = theFontSize*.5 + lineGap
 
-        # set the font size 
-        font(nameFont, theFontSize)
-        lineHeight(theLineHeight)
-
-        # calculate the height of the text box
-        textHeight = 0 + (theFontSize * .7 + lineGap) * lineCount
-
-        # move to the center
-        #translate(boxWidth/2, boxHeight/2)
- 
 
         print(theName)
+        xoffset = None
+        yoffset = None
         for hit, layer in enumerate(['shade', 'shade', 'name', 'shine']):
-            fill(*colorPalette[layer])
-            font(nameFonts[layer])
-            ts = textSize(theName)
-            print(ts)
+            fs = FormattedString(fill=colorPalette[layer], font=nameFonts[layer], fontSize=theFontSize, lineHeight=theLineHeight)
             if hit == 0:
                 #strokeWidth(10)
-                fill(*colorPalette['background'])
+                fs.append('',fill=colorPalette['background'])
                 #stroke(*colorPalette['background'])
             elif hit == 3:
-                fontVariations(nwx0=randint(0, 1000))
+                fontVariations(nwx0=500)
+                fs.append('', fontVariations={'nwx0':500})
+            fs.append(theName)
+            tw, th = textSize(fs)
+            cap = fs.fontCapHeight()
+            #thAdjust = th + (cap-theLineHeight )
             
-            xoffset = (boxWidth - ts[0])/2 + 5
-            textBox(theName, (xoffset, 0, boxWidth, boxHeight-50), align="left")
+            thAdjust = cap*lineCount + lineGap*(lineCount-1)
+            lineOffset = cap*(lineCount-1)+lineGap*(lineCount-1)
+            if xoffset is None:
+                xoffset = (boxWidth - tw)/2 + 2
+            if yoffset is None:
+                yoffset = (boxHeight - thAdjust)/2
+    
+
+            #with savedState():
+            #    fill(1,1,1,.5)
+            #    rect(xoffset, yoffset, tw, thAdjust)
+            
+            text(fs, (xoffset, yoffset+lineOffset))
             stroke(None)
                 
     
@@ -417,7 +440,7 @@ def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False
             fill(*backgroundColor)
             rect(-bleedLeft, 0, w+bleedLeft+bleedRight, h)
 
-        patternFontSize = 35
+        patternFontSize = h/6
         font(patternFont, patternFontSize)
         lineHeight(patternFontSize)
         fill(*colorPalette['pattern'])
@@ -428,8 +451,8 @@ def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False
 
         # print the company name
         companySize = 11
-        affiliateBlock = companySize + 19
-        affiliateBottomMargin = 12
+        affiliateBlock = patternFontSize
+        affiliateBottomMargin = 14
 
         # draw the available space, in case we want to see it
         if DEBUG:
@@ -450,7 +473,7 @@ def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False
         
         # undo company move
         if company and showCompany:
-            drawCompany(company, companySize, w, affiliateBlock, white, affiliateBottomMargin, bleedLeft, bleedRight)
+            drawCompany(company, companySize, w, affiliateBlock, white, affiliateBottomMargin, bleedLeft, bleedRight, patternFontSize)
             
         #oval(210, 10, 1*pt, 1*pt)
             
@@ -600,7 +623,7 @@ if __name__ == "__main__":
     # load data from a csv
     basePath = os.path.split(__file__)[0]
 
-    csvPath = os.path.join(basePath, '../partial/attendees.csv')
+    csvPath = os.path.join(basePath, '../partial/Typographics_Conference_2023_Attendee_Summary_Report_CSV_7366991467_20230605_1401.csv')
 
     colHeaders, data = readDataFromCSV(csvPath)
     
@@ -617,7 +640,6 @@ if __name__ == "__main__":
         # Since we are not double-sided printing, we will print each twice, side-by-side,
         # and fold along the middle.
         colorPalette = colorPalettes[choice(list(colorPalettes.keys()))]
-        print(colorPalette)
         drawSheets(data,
             w,
             h,
@@ -639,7 +661,7 @@ if __name__ == "__main__":
         scaleValue = 5
         #random.shuffle(data)
 
-        for i, rowData in enumerate(data):
+        for i, rowData in enumerate(data[:]):
 
             firstName, lastName, company = parseRowData(rowData, colHeaders)
 
