@@ -15,7 +15,6 @@ import os
 from drawBot import *
 import csv
 from easing_functions import *
-from itertools import cycle
 
 
 def hex2rgb(myHexString):
@@ -49,14 +48,128 @@ def strokeHex(myHexValue):
     # this function uses hex2rgb to convert the value, and then applies the stroke
     stroke(*hex2rgb(myHexValue))
 
+"""
+--accent-color: #000;
+--accent-color-light: #000;
+--bg-color: #5FC6A0;
+--black: #000;
+--black-cool: #211F21;
+--black-faded: #43423B;
+--blue: #0DBBD6;
+--blue-dark: #17388C;
+--brown: #672728;
+--brown-dark: #3E252A;
+--cell-size: calc(100vw / 16);
+--gray: #666;
+--gray-cool: #526166;
+--gray-light: #CCC;
+--green: #8DD951;
+--green-black: #1E3012;
+--green-dark: #00855E;
+--green-light: #5FC6A0;
+--grid-count: 16;
+--orange: #F9A866;
+--ornaments-color: #FFEDD8;
+--ornaments2-color: #FFEDD8;
+--ornaments3-color: #FFEDD8;
+--ornaments4-color: #FFEDD8;
+--ornaments5-color: #FFEDD8;
+--ornaments6-color: #FFEDD8;
+--pink: #F2B8C5;
+--pink-hot: #FD499F;
+--pink-light: #EDCCEB;
+--purple: #8654CC;
+--red: #B50000;
+--red-bright: #F00;
+--red-dark: #890E0E;
+--rules-color: #FFF;
+--tan: #FFEDD8;
+--text-dim: #000;
+--text-primary: #1E3012;
+--text-secondary: #00855E;
+--title-base-color: #F00;
+--title-shade-color: #3E252A;
+--white: #FFF;
+--yellow: #FFE12E;
+"""
 
-colorPalette = {
-    'background': hex2rgb('#e8cde9'),
-    'pattern': hex2rgb('#a62116'),
-    'name': hex2rgb('#ea3323'),
-    'shine': hex2rgb('#FFFFFF'),
-    'shade': hex2rgb('#7d1d17'),
-    }
+colorPalettes = {
+   'cinammon': {
+        'background': hex2rgb('#e8cde9'),
+        'text': hex2rgb('#a62116'),
+        'pattern': hex2rgb('#a62116'),
+        'name': hex2rgb('#ea3323'),
+        'shine': hex2rgb('#FFFFFF'),
+        'shade': hex2rgb('#7d1d17'),
+    },
+    
+   'watermelon': {
+        'background': hex2rgb('#5FC6A0'),
+        'text': (30/255, 48/255, 18/255),
+        'pattern': (255/255, 237/255, 216/255),
+        'name': (255/255, 0, 0),
+        'shine': hex2rgb('#FFFFFF'),
+        'shade': hex2rgb('#3E252A'),
+    },
+    
+   'juicy': {
+        'background': hex2rgb('#8DD951'),
+        'text': (30/255, 48/255, 18/255),
+        'pattern': (255/255, 237/255, 216/255),
+        'name': (253/255, 73/255, 159/255),
+        'shine': hex2rgb('#FFFFFF'),
+        'shade': hex2rgb('#3E252A'),
+    },
+ 
+   'taffy': {
+        'background': hex2rgb('#0DBBD6'),
+        'text': (33/255, 31/255, 33/255),
+        'pattern': (255/255, 237/255, 216/255),
+        'name': (253/255, 73/255, 159/255),
+        'shine': hex2rgb('#FFFFFF'),
+        'shade': hex2rgb('#3E252A'),
+    },
+    
+   'bubblegum': {
+        'background': hex2rgb('#FD499F'),
+        'text': (33/255, 31/255, 33/255),
+        'pattern': (255/255, 225/255, 46/255),
+        'name': (242/255, 184/255, 197/255),
+        'shine': hex2rgb('#FFFFFF'),
+        'shade': hex2rgb('#17388C'),
+    },
+    
+   'sherbet': {
+        'background': hex2rgb('#F9A866'),
+        'text': (33/255, 31/255, 33/255),
+        'pattern': (255/255, 237/255, 216/255),
+        'name': (13/255, 187/255, 214/255),
+        'shine': hex2rgb('#FFFFFF'),
+        'shade': hex2rgb('#672728'),
+    },
+    
+   'primary': {
+        'background': hex2rgb('#FFE12E'),
+        'text': (33/255, 31/255, 33/255),
+        'pattern': (13/255, 187/255, 214/255),
+        'name': (1, 0, 0),
+        'shine': hex2rgb('#FFFFFF'),
+        'shade': hex2rgb('#672728'),
+    },
+   
+}
+
+
+    
+patternText = [
+    """ABabABabABabbaBAbaBAbaBAABabABabABabbaBAbaBAbaBAABabABabABabbaBAbaBAbaBAABabABabABabbaBAbaBAbaBAABabABabABabbaBAbaBAbaBAABabABabABabbaBAbaBAbaBA""",
+    """UuVvUuVvUuVvvVuUvVuUvVuUUuVvUuVvUuVvvVuUvVuUvVuUUuVvUuVvUuVvvVuUvVuUvVuUUuVvUuVvUuVvvVuUvVuUvVuUUuVvUuVvUuVvvVuUvVuUvVuUUuVvUuVvUuVvvVuUvVuUvVuU""",    
+    """;:;:;:;:;:;::;:;:;:;:;:;;:;:;:;:;:;::;:;:;:;:;:;;:;:;:;:;:;::;:;:;:;:;:;;:;:;:;:;:;::;:;:;:;:;:;;:;:;:;:;:;::;:;:;:;:;:;;:;:;:;:;:;::;:;:;:;:;:;""", 
+    """LlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLlLl""",
+    
+"""454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545454545""",
+    ]
+
 
 # keep track of folks whose names will not be on three lines
 linebreakExceptions = [] 
@@ -71,10 +184,10 @@ black = 0, 0, 0, 1    # black
 white = 1, 1, 1, 1    # white
 
 # Get the path to an installed font by name
-nameFont = "../fonts/Mayonnaise-Desktop/Mayonnaise-Extra-Black.otf"
-nameFontShade = "../fonts/Mayonnaise-Desktop/Mayonnaise-Volume-Shadow.otf"
-nameFontShine = "../fonts/Mayonnaise-Desktop/Mayonnaise-Volume-Shine.otf"
-patternFont = 'Crackly-Regular'
+nameFont = '../Typographics fonts 2023-06-05/Mayonnaise v6/Mayonnaise-V6-NS-desk/Mayonnaise-Extra-Black-desktop.otf'
+nameFontShade = '../Typographics fonts 2023-06-05/Mayonnaise v6/Mayonnaise-V6-NS-desk/Mayonnaise-Volume-Shadow-desktop.otf'
+nameFontShine = '../Typographics fonts 2023-06-05/Mayonnaise v6/Mayonnaise-Shine-Variable/Mayonnaise-variable-shine.ttf'
+patternFont = '../Typographics fonts 2023-06-05/Crackly/CracklyLines30.otf'
 
 nameFonts = {
     'shade': nameFontShade,
@@ -83,6 +196,9 @@ nameFonts = {
     }
 
 companyFont = 'fonts/HEX Franklin v0.2 Variable 2022-06-10.ttf'
+
+
+
 
 # Released by DJR under the BSD license 
 def norm(value, start, stop):
@@ -130,10 +246,14 @@ def drawCompany(company, companySize, companyWidth, companyHeight, textColor, bo
     trackValue = 0.15
     wordSpaceTracking = .75
     
-    fill(0)
+    fill(*colorPalette['background'])
     rect(-bleedLeft, 0, width()+bleedLeft+bleedRight, companyHeight)
+    with savedState():
+        stroke(*colorPalette['text'])
+        strokeWidth(0.8)
+        line((0, companyHeight), (width(), companyHeight))
     
-    companyFs = FormattedString('', font=companyFont, fontSize=companySize, fill=(1, 1, 1), lineHeight=companySize, fontVariations={'wdth': 93}, tracking=trackValue)
+    companyFs = FormattedString('', font=companyFont, fontSize=companySize, fill=colorPalette['text'], lineHeight=companySize, fontVariations={'wdth': 93}, tracking=trackValue)
     for companyChar in company:
         if companyChar == ' ':
             companyFs.append(companyChar, tracking=wordSpaceTracking)
@@ -143,10 +263,10 @@ def drawCompany(company, companySize, companyWidth, companyHeight, textColor, bo
     
     cw, ch = textSize(companyFs, width=companyWidth)
     if cw > companyWidth-50:
-        companyFs = FormattedString(company, font=companyFont, fontSize=companySize, fill=(1, 1, 1), lineHeight=companySize, fontVariations={'wdth': 80})
+        companyFs = FormattedString(company, font=companyFont, fontSize=companySize, fill=colorPalette['text'], lineHeight=companySize, fontVariations={'wdth': 80})
 
         
-    fill(0, 1, 0, .5)
+    fill(*colorPalette['text'])
     text(companyFs, (w/2, bottomMargin), align="center")
 
 def capitalize(theText):
@@ -257,16 +377,24 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
  
 
         print(theName)
-        for layer in ['shade', 'name', 'shine']:
+        for hit, layer in enumerate(['shade', 'shade', 'name', 'shine']):
             fill(*colorPalette[layer])
             font(nameFonts[layer])
             ts = textSize(theName)
             print(ts)
+            if hit == 0:
+                #strokeWidth(10)
+                fill(*colorPalette['background'])
+                #stroke(*colorPalette['background'])
+            elif hit == 3:
+                fontVariations(nwx0=randint(0, 1000))
+            
             xoffset = (boxWidth - ts[0])/2 + 5
-            textBox(theName, (xoffset, 0, boxWidth, boxHeight-50), align="left")    
+            textBox(theName, (xoffset, 0, boxWidth, boxHeight-50), align="left")
+            stroke(None)
                 
     
-def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False, backgroundColor=colorPalette['background'], phase=0, bleedLeft=0, bleedRight=0, bgIndex=None):
+def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False, phase=0, bleedLeft=0, bleedRight=0, bgIndex=None, colorPalette=None):
     """
     Draw one badge. This handles the positioning, and lets other functions do the drawing.
     """
@@ -282,23 +410,24 @@ def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False
         clipPath(bp)
 
         # draw the background
+        backgroundColor=colorPalette['background']
         if backgroundColor:
             fill(*backgroundColor)
             rect(-bleedLeft, 0, w+bleedLeft+bleedRight, h)
 
-        patternFontSize = 100
+        patternFontSize = 35
         font(patternFont, patternFontSize)
         lineHeight(patternFontSize)
         fill(*colorPalette['pattern'])
-        patternText = 'AAAAAAAAAAAAAAA\n'*2
-        textBox(patternText, (-boxWidth/2, -boxHeight/2, boxWidth*2, boxHeight*2))
+        pattern = choice(patternText)*6
+        textBox(pattern, (0, -boxHeight, boxWidth*10, boxHeight*2))
 
 
 
         # print the company name
         companySize = 11
-        affiliateBlock = companySize + 21
-        affiliateBottomMargin = 14
+        affiliateBlock = companySize + 19
+        affiliateBottomMargin = 12
 
         # draw the available space, in case we want to see it
         if DEBUG:
@@ -320,6 +449,8 @@ def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False
         # undo company move
         if company and showCompany:
             drawCompany(company, companySize, w, affiliateBlock, white, affiliateBottomMargin, bleedLeft, bleedRight)
+            
+        #oval(210, 10, 1*pt, 1*pt)
             
 
 
@@ -483,6 +614,8 @@ if __name__ == "__main__":
         # let's draw some sheets.
         # Since we are not double-sided printing, we will print each twice, side-by-side,
         # and fold along the middle.
+        colorPalette = colorPalettes[choice(list(colorPalettes.keys()))]
+        print(colorPalette)
         drawSheets(data,
             w,
             h,
@@ -492,6 +625,7 @@ if __name__ == "__main__":
             badgeHeight = h,
             margin = .25*pt,
             multiple=2,
+            colorPalette=colorPalette
             )
 
         os.makedirs('output', exist_ok=True)
@@ -507,6 +641,8 @@ if __name__ == "__main__":
 
             firstName, lastName, company = parseRowData(rowData, colHeaders)
 
+            colorPalette = colorPalettes[choice(list(colorPalettes.keys()))]
+
             newPage(w*scaleValue, h*scaleValue)
             scale(scaleValue, scaleValue)
 
@@ -517,6 +653,7 @@ if __name__ == "__main__":
                 lastName,
                 company,
                 setSize=False,
+                colorPalette=colorPalette
                 )
             #if i > 2:
             #    break
@@ -581,6 +718,7 @@ if __name__ == "__main__":
 
             fullName = firstName+lastName
             saveImage(os.path.join(basePath, 'output/badgebot-output-animation-%s.gif' % fullName))
+            
 
             if i > 2:
                 break
