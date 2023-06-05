@@ -187,7 +187,7 @@ white = 1, 1, 1, 1    # white
 nameFont = '../Typographics fonts 2023-06-05/Mayonnaise v6/Mayonnaise-V6-NS-desk/Mayonnaise-Extra-Black-desktop.otf'
 nameFontShade = '../Typographics fonts 2023-06-05/Mayonnaise v6/Mayonnaise-V6-NS-desk/Mayonnaise-Volume-Shadow-desktop.otf'
 nameFontShine = '../Typographics fonts 2023-06-05/Mayonnaise v6/Mayonnaise-Shine-Variable/Mayonnaise-variable-shine.ttf'
-patternFont = '../Typographics fonts 2023-06-05/Crackly/CracklyLines30.otf'
+patternFont = '../Typographics fonts 2023-06-05/Crackly/CracklyLines20.otf'
 
 nameFonts = {
     'shade': nameFontShade,
@@ -195,7 +195,7 @@ nameFonts = {
     'shine': nameFontShine
     }
 
-companyFont = 'fonts/HEX Franklin v0.2 Variable 2022-06-10.ttf'
+companyFont = '../Typographics fonts 2023-06-05/Cupidus/Cupidus-Regular.ttf'
 
 
 
@@ -246,13 +246,7 @@ def drawCompany(company, companySize, companyWidth, companyHeight, textColor, bo
     trackValue = 0.15
     wordSpaceTracking = .75
     
-    fill(*colorPalette['background'])
-    rect(-bleedLeft, 0, width()+bleedLeft+bleedRight, companyHeight)
-    with savedState():
-        stroke(*colorPalette['text'])
-        strokeWidth(0.8)
-        line((0, companyHeight), (width(), companyHeight))
-    
+
     companyFs = FormattedString('', font=companyFont, fontSize=companySize, fill=colorPalette['text'], lineHeight=companySize, fontVariations={'wdth': 93}, tracking=trackValue)
     for companyChar in company:
         if companyChar == ' ':
@@ -265,6 +259,14 @@ def drawCompany(company, companySize, companyWidth, companyHeight, textColor, bo
     if cw > companyWidth-50:
         companyFs = FormattedString(company, font=companyFont, fontSize=companySize, fill=colorPalette['text'], lineHeight=companySize, fontVariations={'wdth': 80})
 
+        
+    fill(*colorPalette['background'])
+    rect(0, 0, width()+bleedLeft+bleedRight, companyHeight)
+    with savedState():
+        stroke(*colorPalette['pattern'])
+        strokeWidth(0.8)
+        line((0, companyHeight), (width(), companyHeight))
+    
         
     fill(*colorPalette['text'])
     text(companyFs, (w/2, bottomMargin), align="center")
