@@ -399,7 +399,7 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
                    #     fill(1,1,1,.5)
                    #     rect(0, 0, tw, cap)
                    with savedState():
-                       if textSize(fs)[0] < w/2.5 and theFontSize < 55:
+                       if textSize(fs)[0] < w/2.25 and theFontSize < 55:
                            if lineNumber != 0:
                                translate(0, -cap/2)
                            scale(1.5)
