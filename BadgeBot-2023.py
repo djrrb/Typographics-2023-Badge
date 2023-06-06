@@ -225,7 +225,7 @@ ascenders = [u'Ñ', u'Á', u'À', u'Ú', u'Ó', u'É', u'é']
 
 
 
-def drawCompany(company, companySize, companyWidth, companyHeight, textColor, bottomMargin=0, bleedLeft=0, bleedRight=0, patternFontSize=None):
+def drawCompany(company, companySize, companyWidth, companyHeight, textColor, bottomMargin=0, bleedLeft=0, bleedRight=0, patternFontSize=None, colorPalette=None):
     
     trackValue = 0.15
     wordSpaceTracking = .75
@@ -419,7 +419,7 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
                        translate(0, -lineGap)
                 
     
-def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False, phase=0, bleedLeft=0, bleedRight=0, bgIndex=None, colorPalette=None):
+def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False, phase=0, bleedLeft=0, bleedRight=0, bgIndex=None, colorPalette=None, pattern=None):
     """
     Draw one badge. This handles the positioning, and lets other functions do the drawing.
     """
@@ -444,8 +444,10 @@ def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False
         font(patternFont, patternFontSize)
         lineHeight(patternFontSize)
         fill(*colorPalette['pattern'])
-        pattern = choice(patternText)*6
-        textBox(pattern, (0, -boxHeight, boxWidth*10, boxHeight*2))
+        if pattern is None:
+            pattern = choice(patternText)*6
+        
+        textBox(pattern, (-patternFontSize, -boxHeight, boxWidth*10, boxHeight*2))
 
 
 
@@ -473,7 +475,7 @@ def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False
         
         # undo company move
         if company and showCompany:
-            drawCompany(company, companySize, w, affiliateBlock, white, affiliateBottomMargin, bleedLeft, bleedRight, patternFontSize)
+            drawCompany(company, companySize, w, affiliateBlock, white, affiliateBottomMargin, bleedLeft, bleedRight, patternFontSize, colorPalette)
             
         #oval(210, 10, 1*pt, 1*pt)
             
@@ -492,7 +494,7 @@ def drawCropMarks(rows, cols, boxWidth, boxHeight, badgeWidth, badgeHeight, marg
             line((col*badgeWidth, margin), (col*badgeWidth, margin/2))
             line((col*badgeWidth, -boxHeight-margin/2), (col*badgeWidth, -boxHeight-margin))
 
-def drawSheets(data, w, h, sheetWidth=8.5*pt, sheetHeight=11*pt, badgeWidth=None, badgeHeight=None, margin=.25*pt, multiple=2):
+def drawSheets(data, w, h, sheetWidth=8.5*pt, sheetHeight=11*pt, badgeWidth=None, badgeHeight=None, margin=.25*pt, multiple=2, colorPalette=None, pattern=None):
     """
     Make a sheet of badges for printing purposes.
     """
@@ -533,12 +535,16 @@ def drawSheets(data, w, h, sheetWidth=8.5*pt, sheetHeight=11*pt, badgeWidth=None
     # loop through data
     rowTick = 0
     colTick = 0
-    for i, rowData in enumerate(data):
+    for i, rowData in enumerate(data[:]):
+        if 'Livestream' in rowData[8]:
+            continue
         firstName, lastName, company = parseRowData(rowData, colHeaders)
 
         bleedLeft = 100
         bleedRight = 0
         prevColor = None
+        usedPatterns = []
+        usedColorPalettes = []
         for m in range(multiple):
             # draw the badge without setting the page size
             
@@ -549,7 +555,16 @@ def drawSheets(data, w, h, sheetWidth=8.5*pt, sheetHeight=11*pt, badgeWidth=None
                 bleedLeft = 0
                 bleedRight = 100
                 
-            bgColor = colorPalette['background']
+            
+            pattern = choice(patternText)*6
+            colorPalette = colorPalettes[choice(list(colorPalettes.keys()))]
+            while pattern in usedPatterns:
+                pattern = choice(patternText)*6
+            while colorPalette in usedColorPalettes:
+                colorPalette = colorPalettes[choice(list(colorPalettes.keys()))]
+            usedPatterns.append(pattern)
+            usedColorPalettes.append(colorPalette)
+
             drawBadge(
                 w,
                 h,firstName,
@@ -559,9 +574,11 @@ def drawSheets(data, w, h, sheetWidth=8.5*pt, sheetHeight=11*pt, badgeWidth=None
                 phase=1,
                 bleedLeft=bleedLeft,
                 bleedRight=bleedRight,
+                colorPalette=colorPalette,
+                pattern=pattern,
+                
             )
             translate(badgeWidth, 0)
-            prevColor = bgColor
 
             # if we have made it to the last column, translate back and start the next one
             if colTick == cols - 1:
