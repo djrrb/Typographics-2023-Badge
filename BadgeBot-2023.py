@@ -273,7 +273,7 @@ def capitalize(theText):
         theText = theText.upper()
     return theText
 
-def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0, colorIndex=0):
+def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0, colorPalette=None):
     # this function draws the attendee’s name
     with savedState():
         firstName = firstName.strip()
@@ -294,10 +294,10 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
         doLine1Split = True
         doLine2Split = True
         for word in line1words:
-            if len(word) < 2:
+            if len(word) < 3:
                 doLine1Split = False
         for word in line2words:
-            if len(word) < 2:
+            if len(word) < 3:
                 doLine2Split = False
     
         # if the total name plus space is less than 6 chars, draw it on one line
@@ -380,25 +380,17 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
 
 
         translate(xoffset, yoffset)
-        for hit, layer in enumerate(['shade', 'shade', 'name', 'shine']):
+        for hit, layer in enumerate(['shade', 'name', 'shine']):
             with savedState():
                 translate(0, cap*(lineCount-1)+lineGap*(lineCount-1))
                 for lineNumber, line in enumerate(lines):
-                   #fill(0)
-                   #oval(-10, -10, 20, 20)
-                   fs = FormattedString(fill=colorPalette[layer], font=nameFonts[layer], fontSize=theFontSize, lineHeight=theLineHeight, fallbackFont=nameFonts['name'])
-                   if hit == 0:
-                        #strokeWidth(10)
-                        fs.append('',fill=colorPalette['background'])
-                        #stroke(*colorPalette['background'])
-                   elif hit == 3:
-                        fontVariations(nwx0=500)
+                    if layer == 'name':
+                        print(colorPalette[layer])
+                    fs = FormattedString(fill=colorPalette[layer], font=nameFonts[layer], fontSize=theFontSize, lineHeight=theLineHeight, fallbackFont=nameFonts['name'])
+                    if layer == 'shine':
                         fs.append('', fontVariations={'nwx0':500})
-                   fs.append(line)
-                   #with savedState():
-                   #     fill(1,1,1,.5)
-                   #     rect(0, 0, tw, cap)
-                   with savedState():
+                    fs.append(line)
+                    with savedState():
                        if textSize(fs)[0] < w/2.25 and theFontSize < 55:
                            if lineNumber != 0:
                                translate(0, -cap/2)
@@ -414,9 +406,9 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
                            nudge = -.025*theFontSize
                        text(fs, (nudge, 0))
                        stroke(None)
-                   translate(0, -cap-lineGap)
-                   if extraSpaceBelow:
-                       translate(0, -lineGap)
+                    translate(0, -cap-lineGap)
+                    if extraSpaceBelow:
+                        translate(0, -lineGap)
                 
     
 def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False, phase=0, bleedLeft=0, bleedRight=0, bgIndex=None, colorPalette=None, pattern=None):
@@ -461,6 +453,8 @@ def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False
             fill(.8)
             rect(0, 0, boxWidth, boxHeight)
         # move things up if the company exists
+        if company.upper() == 'N/A':
+            company = None
         if company and showCompany:
             boxHeight = boxHeight - affiliateBlock
         else:
@@ -471,7 +465,7 @@ def drawBadge(w, h, firstName, lastName, company=None, setSize=True, DEBUG=False
             #stroke(1, 0, 0)
             #strokeWidth(10)
             #rect(0, 0, boxWidth, boxHeight)
-            sw = drawName(firstName, lastName, boxWidth, boxHeight)
+            sw = drawName(firstName, lastName, boxWidth, boxHeight, colorPalette=colorPalette)
         
         # undo company move
         if company and showCompany:
@@ -494,7 +488,7 @@ def drawCropMarks(rows, cols, boxWidth, boxHeight, badgeWidth, badgeHeight, marg
             line((col*badgeWidth, margin), (col*badgeWidth, margin/2))
             line((col*badgeWidth, -boxHeight-margin/2), (col*badgeWidth, -boxHeight-margin))
 
-def drawSheets(data, w, h, sheetWidth=8.5*pt, sheetHeight=11*pt, badgeWidth=None, badgeHeight=None, margin=.25*pt, multiple=2, colorPalette=None, pattern=None):
+def drawSheets(data, w, h, sheetWidth=8.5*pt, sheetHeight=11*pt, badgeWidth=None, badgeHeight=None, margin=.25*pt, multiple=2, pattern=None):
     """
     Make a sheet of badges for printing purposes.
     """
@@ -557,13 +551,13 @@ def drawSheets(data, w, h, sheetWidth=8.5*pt, sheetHeight=11*pt, badgeWidth=None
                 
             
             pattern = choice(patternText)*6
-            colorPalette = colorPalettes[choice(list(colorPalettes.keys()))]
+            theColorPalette = colorPalettes[choice(list(colorPalettes.keys()))]
             while pattern in usedPatterns:
                 pattern = choice(patternText)*6
-            while colorPalette in usedColorPalettes:
-                colorPalette = colorPalettes[choice(list(colorPalettes.keys()))]
+            while theColorPalette in usedColorPalettes:
+                theColorPalette = colorPalettes[choice(list(colorPalettes.keys()))]
             usedPatterns.append(pattern)
-            usedColorPalettes.append(colorPalette)
+            usedColorPalettes.append(theColorPalette)
 
             drawBadge(
                 w,
@@ -574,7 +568,7 @@ def drawSheets(data, w, h, sheetWidth=8.5*pt, sheetHeight=11*pt, badgeWidth=None
                 phase=1,
                 bleedLeft=bleedLeft,
                 bleedRight=bleedRight,
-                colorPalette=colorPalette,
+                colorPalette=theColorPalette,
                 pattern=pattern,
                 
             )
@@ -635,7 +629,7 @@ if __name__ == "__main__":
     #    "sheets" (3-up badges),
     #    "screen" (single, 1920 x 1080)
     #    "animation" (1920 x 1080) EXPERIMENTAL! GLITCHY! WATCH OUT! :)
-    FORMAT = "single"
+    FORMAT = "sheets"
 
     # load data from a csv
     basePath = os.path.split(__file__)[0]
@@ -669,7 +663,6 @@ if __name__ == "__main__":
             badgeHeight = h,
             margin = .25*pt,
             multiple=2,
-            colorPalette=colorPalette
             )
 
         os.makedirs('output', exist_ok=True)
