@@ -195,9 +195,15 @@ black = 0, 0, 0, 1    # black
 white = 1, 1, 1, 1    # white
 
 # Get the path to an installed font by name
-nameFont = '../Typographics fonts 2023-06-05/Mayonnaise v6/Mayonnaise-V6-NS-desk/Mayonnaise-Extra-Black-desktop.otf'
-nameFontShade = '../Typographics fonts 2023-06-05/Mayonnaise v6/Mayonnaise-V6-NS-desk/Mayonnaise-Volume-Shadow-desktop.otf'
-nameFontShine = '../Typographics fonts 2023-06-05/Mayonnaise v6/Mayonnaise-Shine-Variable/Mayonnaise-variable-shine.ttf'
+nameFont = nameFontFallback = '../Mayonnaise-v8/Mayonnaise-Regular.otf'
+nameFontShade = '../Mayonnaise-v8/Mayonnaise-Shadow.otf'
+nameFontShine = '../Mayonnaise-v8/Mayonnaise-Shine.otf'
+
+
+#nameFontShine = '../Mayonnaise-V7-otf/Mayonnaise-Easy-Shine-Typographics.otf'
+
+#nameFont = '../Mayonnaise-V7-otf/Mayonnaise-Extra-Black-Typographics.otf'
+
 patternFont = '../Typographics fonts 2023-06-05/Crackly/CracklyLines20.otf'
 companyFont = '../Typographics fonts 2023-06-05/Cupidus/Cupidus-Text.ttf'
 
@@ -359,13 +365,15 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
             theFontSize = manyLineMaxFontSize
         # add space between lines, factoring in overshoot
         lineGap = theFontSize*.06
+        if 'JÖRGER' in theName or 'STÖSSINGER' in theName:
+            lineGap = theFontSize*.25
         theLineHeight = theFontSize*.5 + lineGap
 
 
         print(theName, theFontSize)
 
         
-        fs = FormattedString(theName, fill=1, font=nameFonts['name'], fontSize=theFontSize, lineHeight=theLineHeight, fallbackFont=nameFonts['name'])
+        fs = FormattedString(theName, fill=1, font=nameFonts['name'], fontSize=theFontSize, lineHeight=theLineHeight, fallbackFont=nameFontFallback)
 
         tw, th = textSize(fs)
         cap = fs.fontCapHeight()
@@ -386,9 +394,9 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
                 for lineNumber, line in enumerate(lines):
                     if layer == 'name':
                         print(colorPalette[layer])
-                    fs = FormattedString(fill=colorPalette[layer], font=nameFonts[layer], fontSize=theFontSize, lineHeight=theLineHeight, fallbackFont=nameFonts['name'])
+                    fs = FormattedString(fill=colorPalette[layer], font=nameFonts[layer], fontSize=theFontSize, lineHeight=theLineHeight, fallbackFont=nameFontFallback)
                     if layer == 'shine':
-                        fs.append('', fontVariations={'nwx0':500})
+                        fs.append('')
                     fs.append(line)
                     with savedState():
                        if textSize(fs)[0] < w/2.25 and theFontSize < 55:
@@ -634,7 +642,9 @@ if __name__ == "__main__":
     # load data from a csv
     basePath = os.path.split(__file__)[0]
 
-    csvPath = os.path.join(basePath, '../partial/Typographics_Conference_2023_Attendee_Summary_Report_CSV_7366991467_20230605_1401.csv')
+    csvPath = os.path.join(basePath, '../partial/Typographics_Conference_2023_Attendee_Summary_Report_Excel_7366991467_20230609_1708/As of June 9 at 5 pm-Table 1.csv')
+    
+    
 
     #csvPath = os.path.join(basePath, '../partial/attendees.csv')
 
