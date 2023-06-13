@@ -271,7 +271,7 @@ def drawCompany(company, companySize, companyWidth, companyHeight, textColor, bo
 def capitalize(theText):
     # convert text to uppercase, and deal with McNames => McNAMES
     try:
-        if theText[0:2] in ['Mc', 'La'] and theText[2] == theText[2].upper() and theText[3] == theText[3].lower():
+        if theText[0:2] in ['Mc', 'De'] and theText[2] == theText[2].upper() and theText[3] == theText[3].lower():
             theText = theText[0:2] + theText[2:].upper()
         else:
             theText = theText.upper()
@@ -687,10 +687,14 @@ if __name__ == "__main__":
         for i, rowData in enumerate(data[:]):
 
             firstName, lastName, company = parseRowData(rowData, colHeaders)
+            
             if 'Livestream' in rowData[8]:
                 continue
 
             colorPalette = colorPalettes[choice(list(colorPalettes.keys()))]
+            company = company.replace(' — ', ' ')
+            if company == firstName + ' ' + lastName:
+                company = ''
 
             newPage(w*scaleValue, h*scaleValue)
             scale(scaleValue, scaleValue)
