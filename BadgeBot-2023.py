@@ -538,8 +538,6 @@ def drawSheets(data, w, h, sheetWidth=8.5*pt, sheetHeight=11*pt, badgeWidth=None
     rowTick = 0
     colTick = 0
     for i, rowData in enumerate(data[:]):
-        if 'Livestream' in rowData[8]:
-            continue
         firstName, lastName, company = parseRowData(rowData, colHeaders)
 
         bleedLeft = 100
@@ -642,7 +640,7 @@ if __name__ == "__main__":
     # load data from a csv
     basePath = os.path.split(__file__)[0]
 
-    csvPath = os.path.join(basePath, '../partial/Typographics_Conference_2023_Attendee_Summary_Report_Excel_7366991467_20230609_1708/As of June 9 at 5 pm-Table 1.csv')
+    csvPath = os.path.join(basePath, '../')
     
     
 
