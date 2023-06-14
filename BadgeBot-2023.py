@@ -640,7 +640,7 @@ if __name__ == "__main__":
     # load data from a csv
     basePath = os.path.split(__file__)[0]
 
-    csvPath = os.path.join(basePath, '../')
+    csvPath = os.path.join(basePath, '../attendees.csv')
     
     
 
