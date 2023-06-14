@@ -266,7 +266,7 @@ def drawCompany(company, companySize, companyWidth, companyHeight, textColor, bo
     diff = (companyHeight-ch)/2
         
     fill(*colorPalette['text'])
-    textBox(companyFs, (-cwmu/2, -diff, cwmu, companyHeight), align="center")
+    textBox(companyFs, (-cwmu/2, -diff, cwmu, companyHeight), )
 
 def capitalize(theText):
     # convert text to uppercase, and deal with McNames => McNAMES
@@ -365,8 +365,17 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
             theFontSize = manyLineMaxFontSize
         # add space between lines, factoring in overshoot
         lineGap = theFontSize*.06
+        alignment="left"
+        alignOffset = 0
         if 'JÖRGER' in theName or 'STÖSSINGER' in theName:
             lineGap = theFontSize*.25
+        if  'TINIZARAY' in theName:
+            lineGap = theFontSize*.15
+        if  'TAMARA\nNAOMI' in theName:
+            lineGap = theFontSize*.15
+            alignment = 'center'
+            alignOffset = 110
+
         theLineHeight = theFontSize*.5 + lineGap
 
 
@@ -374,6 +383,10 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
 
         
         fs = FormattedString(theName, fill=1, font=nameFonts['name'], fontSize=theFontSize, lineHeight=theLineHeight, fallbackFont=nameFontFallback)
+        font(nameFonts['name'])
+        contains = fontContainsCharacters(theName)
+        if not contains:
+            print('MISSING CHARACTERS', theName )
 
         tw, th = textSize(fs)
         cap = fs.fontCapHeight()
@@ -394,24 +407,26 @@ def drawName(firstName, lastName, boxWidth, boxHeight, bleedLeft=0, bleedRight=0
                 for lineNumber, line in enumerate(lines):
                     if layer == 'name':
                         print(colorPalette[layer])
-                    fs = FormattedString(fill=colorPalette[layer], font=nameFonts[layer], fontSize=theFontSize, lineHeight=theLineHeight, fallbackFont=nameFontFallback)
+                    
+                    fs = FormattedString(fill=colorPalette[layer], font=nameFonts[layer], fontSize=theFontSize, lineHeight=theLineHeight, fallbackFont=nameFontFallback, align=alignment)
                     if layer == 'shine':
                         fs.append('')
                     fs.append(line)
                     with savedState():
                        if textSize(fs)[0] < w/2.25 and theFontSize < 55:
                            if lineNumber != 0:
-                               translate(0, -cap/2)
-                           scale(1.5)
-                           extraSpaceBelow = True
+                               pass
+                           scale(1)
+                           extraSpaceBelow = False
                        else:
                            extraSpaceBelow = False
                    
-                       nudge = 0
+                       nudge = 0 + alignOffset
                        if fs[0] == 'J':
-                           nudge = -.05*theFontSize
+                           nudge += -.05*theFontSize
                        elif fs[0] == 'T':
-                           nudge = -.025*theFontSize
+                           nudge += -.025*theFontSize
+                           
                        text(fs, (nudge, 0))
                        stroke(None)
                     translate(0, -cap-lineGap)
@@ -641,11 +656,8 @@ if __name__ == "__main__":
     basePath = os.path.split(__file__)[0]
 
     csvPath = os.path.join(basePath, '../attendees.csv')
-    
-    
-
-    #csvPath = os.path.join(basePath, '../partial/attendees.csv')
-
+    #csvPath = '/Users/david/Documents/Education/Clients/Typographics_Conference_2023_Attendee_Summary_Report_Excel_7366991467_20230609_1708.xlsx - Full in person attendee list.csv'
+    #csvPath = '/Users/david/Documents/Education/Clients/Typographics_Conference_2023_Attendee_Summary_Report_Excel_7366991467_20230609_1708.xlsx - June 13–14.csv'
 
     colHeaders, data = readDataFromCSV(csvPath)
     
